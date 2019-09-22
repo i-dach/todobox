@@ -1,0 +1,33 @@
+openapi: '3.0.2'
+info:
+  title: API Title
+  version: '1.0'
+  description: this is a OpenAPI test
+  license:
+    name: i-dach
+servers:
+  - url: https://api.server.test/v1
+
+
+
+
+components:
+  responses:
+    OK:
+      description: ok status
+      content:
+        application/json:
+          schema:
+            type: string
+paths:
+  /test:
+    get:
+      responses:
+        '200':
+          description: OK
+
+    post:
+      description: post
+      responses:
+        '200':
+          $ref: '#/components/responses/OK'
