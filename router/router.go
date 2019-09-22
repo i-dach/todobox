@@ -20,7 +20,8 @@ func Router(r *gin.Engine) error {
 	// Simple group
 	api := r.Group("/api")
 	{
-		api.GET("/todo", todo.Add)
+		api.POST("/task", todo.Add)
+		// api.GET("/task/:id", todo.)
 		// q.GET("/:tag", todo.)
 	}
 
