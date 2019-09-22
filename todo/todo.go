@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	db "github.com/sencondly/todobox/database"
+	database "github.com/sencondly/todobox/database"
 )
 
 type Todo interface {
@@ -56,10 +56,11 @@ func Add(c *gin.Context) {
 		return
 	}
 
-	db, err := db.Open()
+	db, err := database.Open()
 	if err != nil {
+		msg := fmt.Sprintf("db connection error: %v", err)
 		todo := Error()
-		todo.Resp(c, "db connection error")
+		todo.Resp(c, msg)
 		return
 	}
 
@@ -83,4 +84,67 @@ func AddFunc(db *sql.DB, title string) (int64, error) {
 	}
 
 	return r.LastInsertId()
+}
+
+// Update = taskの更新を行う
+/*
+	更新する際にはIDの指定を必須とする
+	更新可能なのは「タイトル」「内容（詳細）」
+*/
+func Update(c *gin.Context) {
+	// patchされたデータを取得
+	var data database.Todo
+	if err := c.ShouldBind(&data); err != nil {
+		msg := fmt.Sprintf("no setting data: %v", err)
+		todo := Error()
+		todo.Resp(c, msg)
+		return
+	}
+
+	db, err := database.Open()
+	if err != nil {
+		msg := fmt.Sprintf("db connection error: %v", err)
+		todo := Error()
+		todo.Resp(c, msg)
+		return
+	}
+
+	if err := UpdateFunc(db, &data); err != nil {
+		todo := NotFound()
+		todo.Resp(c, fmt.Sprint(err))
+		return
+	}
+
+	msg := fmt.Sprintf("update recode: %s", data.ID)
+	todo := Success()
+	todo.Resp(c, msg)
+}
+
+func UpdateFunc(db *sql.DB, data *database.Todo) error {
+	// トランザクションを開始
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	row := tx.QueryRow("SELECT * FROM todo WHERE id = ?", data.ID)
+
+	var res database.Todo
+	if err = row.Scan(&res.ID, &res.Title, &res.Description); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	const taskUpdateSQL = "UPDATE todo SET title = ?, description = ? WHERE id = ?"
+	_, err = tx.Exec(taskUpdateSQL, data.Title, data.Description, data.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
 }
