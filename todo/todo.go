@@ -2,6 +2,7 @@ package todo
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -146,5 +147,63 @@ func UpdateFunc(db *sql.DB, data *database.Todo) error {
 		return err
 	}
 
+	return nil
+}
+
+// Select = taskの取得を行う
+/*
+	Delしていないtaskを取得する
+*/
+func Select(c *gin.Context) {
+	// 基本的にはDel以外は全取得
+	var data []database.Todo
+
+	db, err := database.Open()
+	if err != nil {
+		msg := fmt.Sprintf("db connection error: %v", err)
+		todo := Error()
+		todo.Resp(c, msg)
+		return
+	}
+
+	if err := SelectFunc(db, &data); err != nil {
+		todo := NotFound()
+		todo.Resp(c, fmt.Sprint(err))
+		return
+	}
+
+	jsonBytes, err := json.Marshal(data)
+	if err != nil {
+		msg := fmt.Sprintf("json marshal error: %v", err)
+		todo := NotFound()
+		todo.Resp(c, msg)
+		return
+	}
+
+	msg := fmt.Sprint(jsonBytes)
+	todo := Success()
+	todo.Resp(c, msg)
+}
+
+func SelectFunc(db *sql.DB, d *[]database.Todo) error {
+	rows, err := db.Query("SELECT id, title, description FROM todo WHERE id NOT IS (SELECT id FROM events WHERE del = 0)")
+	if err != nil {
+		return err
+	}
+
+	var data []database.Todo
+	for rows.Next() {
+		var res database.Todo
+		if err := rows.Scan(&res.ID, &res.Title, &res.Description); err != nil {
+			continue
+		}
+		data = append(data, res)
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	d = &data
 	return nil
 }

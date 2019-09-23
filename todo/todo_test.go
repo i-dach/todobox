@@ -60,3 +60,29 @@ func TestUpdateFunc(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestSelectFunc(t *testing.T) {
+	// 前準備
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Error(err)
+	}
+	defer db.Close()
+
+	rows := sqlmock.NewRows([]string{"id", "title", "description"}).
+		AddRow("1", "test", "").
+		AddRow("2", "I am test", "this is a test")
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT id, title, description FROM todo WHERE id NOT IS (SELECT id FROM events WHERE del = 0)")).WillReturnRows(rows)
+
+	// モックDBを使ったテスト
+	var data []database.Todo
+	if err = SelectFunc(db, &data); err != nil {
+		t.Error(err)
+	}
+
+	// 返り値が期待通りかを検証
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Error(err)
+	}
+}

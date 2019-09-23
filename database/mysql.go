@@ -34,7 +34,14 @@ func Open() (*sql.DB, error) {
 *********************************************/
 // Todo = this tables into Todo Resource infomation.
 type Todo struct {
-	ID          string `id:"id"`
-	Title       string `title:"task"`
-	Description string `description:""`
+	ID          string `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+// Events = this tables into Todo Event infomation.
+type Events struct {
+	ID   string `json:"id"`
+	DONE int    `json:"done"`
+	DEL  int    `json:"del"`
 }
