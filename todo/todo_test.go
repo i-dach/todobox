@@ -86,3 +86,23 @@ func TestSelectFunc(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestDoneFunc(t *testing.T) {
+	// 前準備
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Error(err)
+	}
+	defer db.Close()
+
+	mock.ExpectExec("INSERT INTO events").WithArgs("1").WillReturnResult(sqlmock.NewResult(1, 1))
+	// モックDBを使ったテスト
+	if _, err = DoneFunc(db, "1"); err != nil {
+		t.Error(err)
+	}
+
+	// 返り値が期待通りかを検証
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Error(err)
+	}
+}

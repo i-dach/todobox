@@ -207,3 +207,46 @@ func SelectFunc(db *sql.DB, d *[]database.Todo) error {
 	d = &data
 	return nil
 }
+
+// Done = taskを完了させる
+/*
+	完了はeventsテーブルに登録をする形
+*/
+func ç(c *gin.Context) {
+	// 指定されたidを取得
+	id := c.PostForm("id")
+	if id == "" {
+		todo := Error()
+		todo.Resp(c, "no setting id")
+		return
+	}
+
+	db, err := database.Open()
+	if err != nil {
+		msg := fmt.Sprintf("db connection error: %v", err)
+		todo := Error()
+		todo.Resp(c, msg)
+		return
+	}
+
+	res, err := DoneFunc(db, id)
+	if err != nil {
+		todo := NotFound()
+		todo.Resp(c, "insert record error:")
+		return
+	}
+
+	msg := fmt.Sprintf("insert recode :%d", res)
+	todo := Success()
+	todo.Resp(c, msg)
+}
+
+func DoneFunc(db *sql.DB, id string) (int64, error) {
+	const sql = "INSERT INTO events(id, done) values(?, 1)"
+	r, err := db.Exec(sql, id)
+	if err != nil {
+		return 0, err
+	}
+
+	return r.LastInsertId()
+}
