@@ -18,11 +18,16 @@ func Router(r *gin.Engine) error {
 	})
 
 	// Simple group
-	api := r.Group("/api")
+	api := r.Group("/todo")
 	{
+		// Entity の操作
 		api.POST("/task", todo.Add)
-		// api.GET("/task/:id", todo.)
-		// q.GET("/:tag", todo.)
+		api.PATCH("/task", todo.Update)
+		api.GET("/task", todo.Select)
+
+		// Task event
+		api.POST("/task/done/:id", todo.Done)
+		api.DELETE("/task/delete", todo.Delete)
 	}
 
 	return nil
