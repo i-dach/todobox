@@ -212,7 +212,7 @@ func SelectFunc(db *sql.DB, d *[]database.Todo) error {
 /*
 	完了はeventsテーブルに登録をする形
 */
-func ç(c *gin.Context) {
+func Done(c *gin.Context) {
 	// 指定されたidを取得
 	id := c.PostForm("id")
 	if id == "" {
@@ -232,17 +232,60 @@ func ç(c *gin.Context) {
 	res, err := DoneFunc(db, id)
 	if err != nil {
 		todo := NotFound()
-		todo.Resp(c, "insert record error:")
+		todo.Resp(c, "done task error:")
 		return
 	}
 
-	msg := fmt.Sprintf("insert recode :%d", res)
+	msg := fmt.Sprintf("done task :%d", res)
 	todo := Success()
 	todo.Resp(c, msg)
 }
 
 func DoneFunc(db *sql.DB, id string) (int64, error) {
 	const sql = "INSERT INTO events(id, done) values(?, 1)"
+	r, err := db.Exec(sql, id)
+	if err != nil {
+		return 0, err
+	}
+
+	return r.LastInsertId()
+}
+
+// Dele = taskを削除させる
+/*
+	削除はeventsテーブルに登録をする形
+*/
+func Delete(c *gin.Context) {
+	// 指定されたidを取得
+	id := c.PostForm("id")
+	if id == "" {
+		todo := Error()
+		todo.Resp(c, "no setting id")
+		return
+	}
+
+	db, err := database.Open()
+	if err != nil {
+		msg := fmt.Sprintf("db connection error: %v", err)
+		todo := Error()
+		todo.Resp(c, msg)
+		return
+	}
+
+	res, err := DeleteFunc(db, id)
+	if err != nil {
+		todo := NotFound()
+		todo.Resp(c, "delete record error:")
+		return
+	}
+
+	msg := fmt.Sprintf("delete recode :%d", res)
+	todo := Success()
+	todo.Resp(c, msg)
+}
+
+func DeleteFunc(db *sql.DB, id string) (int64, error) {
+	const sql = "INSERT INTO events(id, del) values(?, 1)"
 	r, err := db.Exec(sql, id)
 	if err != nil {
 		return 0, err
