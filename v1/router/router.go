@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/sencondly/todobox/todo"
+	"github.com/i-dach/todobox/v1/todo"
 )
 
 // GinRouter is router that API method router.

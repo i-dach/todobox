@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	r "github.com/sencondly/todobox/router"
+	r "github.com/i-dach/todobox/v1/router"
 
 	"github.com/gin-gonic/gin"
 )

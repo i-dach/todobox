@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
-	database "github.com/sencondly/todobox/database"
+	database "github.com/i-dach/todobox/v1/database"
 )
 
 func TestAddFunc(t *testing.T) {

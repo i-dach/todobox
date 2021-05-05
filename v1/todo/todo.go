@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	database "github.com/sencondly/todobox/database"
+	"github.com/i-dach/todobox/v1/database"
 )
 
 type Todo interface {
