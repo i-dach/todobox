@@ -8,6 +8,8 @@ const (
 	Done
 )
 
+type TaskID int
+
 // Task contain task attribute and task state.
 type Task struct {
 	Name  string
